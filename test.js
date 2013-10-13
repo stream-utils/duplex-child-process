@@ -33,7 +33,7 @@ describe('Duplex Child Process', function () {
 
     streamTo.buffer(proc, function (err, buf) {
       assert.ifError(err)
-      assert.equal('JPEG', buf.toString('utf8'))
+      assert.equal('JPEG', buf.toString('utf8').trim())
       done()
     })
   })
@@ -50,7 +50,7 @@ describe('Duplex Child Process', function () {
 
     streamTo.buffer(proc2, function (err, buf) {
       assert.ifError(err)
-      assert.equal('PNG', buf.toString('utf8'))
+      assert.equal('PNG', buf.toString('utf8').trim())
       done()
     })
   })
