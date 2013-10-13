@@ -10,6 +10,11 @@ require('util').inherits(Wrapper, Duplex)
 
 module.exports = Wrapper
 
+// Convenience method
+Wrapper.spawn = function (command, args, options) {
+  return new Wrapper().spawn(command, args, options)
+}
+
 /*
 
   Use the constructor to setup/reset the Duplex.
