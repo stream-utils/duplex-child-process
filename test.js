@@ -77,4 +77,20 @@ describe('Duplex Child Process', function () {
     .on('error', done)
     .destroy()
   })
+
+  it('should pipe a source stream before spawning', function (done) {
+    fs.createReadStream(image)
+    .on('error', done)
+    .pipe(new Wrapper())
+    .spawn('convert', ['-', 'PNG:-'])
+    .on('error', done)
+    .pipe(new Wrapper())
+    .spawn('identify', ['-format', '%m', '-'])
+    .on('error', done)
+    .on('readable', function () {
+      assert.equal('PNG', this.read().toString('utf8').trim())
+
+      done()
+    })
+  })
 })
