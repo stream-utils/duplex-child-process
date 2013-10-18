@@ -86,12 +86,18 @@ Wrapper.prototype.spawn = function (command, args, options) {
     exited = true
 
     if (ex) {
+      // Emit an error
       that.emit('error', ex)
       that.emit('close')
     } else if (code === 0 && signal == null) {
+      // All is well
       that.emit('end')
       that.emit('close')
+    } else if (killed) {
+      // Destroyed
+      that.emit('close')
     } else {
+      // Everything else
       ex = new Error('Command failed: ' + Buffer.concat(stderr).toString('utf8'))
       ex.killed = that._process.killed || killed
       ex.code = code
@@ -131,16 +137,20 @@ Wrapper.prototype.spawn = function (command, args, options) {
     that._stdin =
     that._reader =
     that._writer =
+    that._readableState =
+    that._writableState =
     stderr =
     ex =
     exited =
     killed = null
 
-    that.kill = noop
+    that.kill =
+    that.destroy = noop
   }
 }
 
 // Delegate events to the correct substream
+// Note: do not delegate the `end` event
 var delegateEvents = {
   readable: '_reader',
   data: '_reader',
@@ -196,6 +206,7 @@ Wrapper.prototype.write = function (chunk, enc, cb) {
   return this._writer.write(chunk, enc, cb)
 }
 
+Wrapper.prototype.destroy =
 Wrapper.prototype.kill =
 Wrapper.prototype.noop = noop
 

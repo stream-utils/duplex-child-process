@@ -54,4 +54,27 @@ describe('Duplex Child Process', function () {
       done()
     })
   })
+
+  it('should cleanup after itself', function (done) {
+    var proc = new Wrapper().spawn('convert', ['-version'])
+    .on('end', function () {
+      setImmediate(function () {
+        assert.ok(!proc._process)
+        assert.ok(!proc._stdin)
+        assert.ok(!proc._stdout)
+        assert.ok(!proc._stderr)
+        assert.ok(!proc._writer)
+        assert.ok(!proc._reader)
+
+        done()
+      })
+    })
+  })
+
+  it('should not emit an error on destroy', function (done) {
+    var proc = new Wrapper().spawn('convert', ['-version'])
+    .on('close', done)
+    .on('error', done)
+    .destroy()
+  })
 })
