@@ -1,7 +1,7 @@
 {
   "name": "duplex-child-process",
   "description": "Spawn a child process as a duplex stream",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {
     "name": "Jonathan Ong",
     "email": "me@jongleberry.com",
