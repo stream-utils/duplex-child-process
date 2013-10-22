@@ -6,13 +6,13 @@ var Stream = require('stream')
 var Duplex = Stream.Duplex
 var PassThrough = Stream.PassThrough
 
-require('util').inherits(Wrapper, Duplex)
+require('util').inherits(Child_Process, Duplex)
 
-module.exports = Wrapper
+module.exports = Child_Process
 
 // Convenience method
-Wrapper.spawn = function (command, args, options) {
-  return new Wrapper().spawn(command, args, options)
+Child_Process.spawn = function (command, args, options) {
+  return new Child_Process().spawn(command, args, options)
 }
 
 /*
@@ -24,12 +24,12 @@ Wrapper.spawn = function (command, args, options) {
     if (!(this instanceof Something))
       return new Something(options)
 
-    Wrapper.call(this, options)
+    Child_Process.call(this, options)
   }
 
 */
 
-function Wrapper(options) {
+function Child_Process(options) {
   this._reader = new PassThrough(options)
   this._writer = new PassThrough(options)
   Duplex.call(this, options)
@@ -48,11 +48,11 @@ function Wrapper(options) {
 /*
 
   Execute this when you actually want to spawn the child process.
-  Assumes you already did `Wrapper.call(this, options)`.
+  Assumes you already did `Child_Process.call(this, options)`.
 
 */
 
-Wrapper.prototype.spawn = function (command, args, options) {
+Child_Process.prototype.spawn = function (command, args, options) {
   var that = this
 
   this._process = spawn(command, args, options)
@@ -61,7 +61,7 @@ Wrapper.prototype.spawn = function (command, args, options) {
   this._stderr = this._process.stderr
   this._writer.pipe(this._stdin)
   this._stdout.pipe(this._reader)
-  this.kill = kill
+  this.kill = this.destroy = kill
 
   // We only listen to stderr.
   var stderr = []
@@ -85,16 +85,15 @@ Wrapper.prototype.spawn = function (command, args, options) {
 
     exited = true
 
-    if (ex) {
+    if (killed) {
+
+    } else if (ex) {
       // Emit an error
       that.emit('error', ex)
       that.emit('close')
     } else if (code === 0 && signal == null) {
       // All is well
       that.emit('end')
-      that.emit('close')
-    } else if (killed) {
-      // Destroyed
       that.emit('close')
     } else {
       // Everything else
@@ -135,10 +134,6 @@ Wrapper.prototype.spawn = function (command, args, options) {
     that._stderr =
     that._stdout =
     that._stdin =
-    that._reader =
-    that._writer =
-    that._readableState =
-    that._writableState =
     stderr =
     ex =
     exited =
@@ -169,7 +164,7 @@ var eventMethods = [
 eventMethods.forEach(function (method) {
   var og = Duplex.prototype[method]
 
-  Wrapper.prototype[method] = function (ev, fn) {
+  Child_Process.prototype[method] = function (ev, fn) {
     var substream = delegateEvents[ev]
     if (substream)
       return this[substream][method](ev, fn)
@@ -179,35 +174,35 @@ eventMethods.forEach(function (method) {
 })
 
 // Reset the alias
-Wrapper.prototype.addListener = Wrapper.prototype.on
+Child_Process.prototype.addListener = Child_Process.prototype.on
 
 // Delegate the other methods
-Wrapper.prototype.pipe = function (dest, opts) {
+Child_Process.prototype.pipe = function (dest, opts) {
   return this._reader.pipe(dest, opts)
 }
 
-Wrapper.prototype.unpipe = function (dest) {
+Child_Process.prototype.unpipe = function (dest) {
   return this._reader.unpipe(dest)
 }
 
-Wrapper.prototype.setEncoding = function (enc) {
+Child_Process.prototype.setEncoding = function (enc) {
   return this._reader.setEncoding(enc)
 }
 
-Wrapper.prototype.read = function (size) {
+Child_Process.prototype.read = function (size) {
   return this._reader.read(size)
 }
 
-Wrapper.prototype.end = function (chunk, enc, cb) {
+Child_Process.prototype.end = function (chunk, enc, cb) {
   return this._writer.end(chunk, enc, cb)
 }
 
-Wrapper.prototype.write = function (chunk, enc, cb) {
+Child_Process.prototype.write = function (chunk, enc, cb) {
   return this._writer.write(chunk, enc, cb)
 }
 
-Wrapper.prototype.destroy =
-Wrapper.prototype.kill =
-Wrapper.prototype.noop = noop
+Child_Process.prototype.destroy =
+Child_Process.prototype.kill =
+Child_Process.prototype.noop = noop
 
 function noop() {}
