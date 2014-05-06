@@ -85,7 +85,7 @@ describe('Duplex Child Process', function () {
     .pipe(new Child_Process())
     .spawn('identify', ['-format', '%m', '-'])
     .on('error', done)
-    .on('readable', function () {
+    .once('readable', function () {
       assert.equal('PNG', this.read().toString('utf8').trim())
 
       done()
