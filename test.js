@@ -86,9 +86,11 @@ describe('Duplex Child Process', function () {
     .spawn('identify', ['-format', '%m', '-'])
     .on('error', done)
     .on('readable', function () {
-      assert.equal('PNG', this.read().toString('utf8').trim())
-
-      done()
+      var data = this.read()
+      if (data) {
+        assert.equal('PNG', data.toString('utf8').trim())
+        done()
+      }
     })
   })
 })
