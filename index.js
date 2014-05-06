@@ -68,8 +68,9 @@ Child_Process.prototype.spawn = function (command, args, options) {
   this._stderr.on('data', onStderrData)
   
   // In some cases ECONNRESET can be emitted by stdin because the process is not interested in any
-  // more data but the _writer is still piping. This should not trigger an error.
+  // more data but the _writer is still piping. Forget about errors emitted on stdin and stdout
   this._stdin.on('error', noop)
+  this._stdout.on('error', noop)
   
   this._process.once('close', onExit)
   this._process.once('error', onError)
