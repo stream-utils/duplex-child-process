@@ -27,6 +27,7 @@ describe('Duplex Child Process', function () {
 
   it('should emit an end event', function (done) {
     var proc = Child_Process.spawn('identify', ['-format', '%m', image])
+    proc.pipe(devnull())
     proc.on('end', done)
     proc.on('error', done)
   })
@@ -60,7 +61,7 @@ describe('Duplex Child Process', function () {
 
   it('should cleanup after itself', function (done) {
     var proc = Child_Process.spawn('convert', ['-version'])
-    .on('end', function () {
+    .on('close', function () {
       setImmediate(function () {
         assert.ok(!proc._process)
         assert.ok(!proc._stdin)
@@ -110,24 +111,6 @@ describe('Duplex Child Process', function () {
     stream.write(process1);
 
     stream.end();
-    stream.pipe(sink);
-  });
-
-
-  it('should work with combined-stream', function(done) {
-    var stream = cs.create({ pauseStreams: false});
-    var sink = devnull();
-    sink.on('finish', done);
-
-    var process1 = Child_Process.spawn('echo', ['Hello']);
-    var process2 = Child_Process.spawn('echo', ['World']);
-
-    // we send the processes in reverse order because to highlight
-    // the fact that the 'end' event from process1 should not
-    // fire too early
-    stream.append(process2);
-    stream.append(process1);
-
     stream.pipe(sink);
   });
 
