@@ -99,7 +99,6 @@ Child_Process.prototype.spawn = function (command, args, options) {
       that.emit('close')
     } else if (code === 0 && signal == null) {
       // All is well
-      that.emit('end')
       that.emit('close')
     } else {
       // Everything else
@@ -150,11 +149,10 @@ Child_Process.prototype.spawn = function (command, args, options) {
   }
 }
 
-// Delegate events to the correct substream
-// Note: do not delegate the `end` event
 var delegateEvents = {
   readable: '_reader',
   data: '_reader',
+  end: '_reader',
   drain: '_writer',
   finish: '_writer'
 }

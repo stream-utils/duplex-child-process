@@ -2,6 +2,9 @@ var path = require('path')
 var fs = require('fs')
 var assert = require('assert')
 var streamTo = require('stream-to')
+var cs = require('combined-stream');
+var ss = require('stream-stream');
+var devnull = require('dev-null');
 
 var Child_Process = require('./')
 
@@ -24,6 +27,7 @@ describe('Duplex Child Process', function () {
 
   it('should emit an end event', function (done) {
     var proc = Child_Process.spawn('identify', ['-format', '%m', image])
+    proc.pipe(devnull())
     proc.on('end', done)
     proc.on('error', done)
   })
@@ -57,7 +61,7 @@ describe('Duplex Child Process', function () {
 
   it('should cleanup after itself', function (done) {
     var proc = Child_Process.spawn('convert', ['-version'])
-    .on('end', function () {
+    .on('close', function () {
       setImmediate(function () {
         assert.ok(!proc._process)
         assert.ok(!proc._stdin)
@@ -91,4 +95,24 @@ describe('Duplex Child Process', function () {
       done()
     })
   })
+
+  it('should work with stream-stream', function(done) {
+    var stream = ss();
+    var sink = devnull();
+    sink.on('finish', done);
+
+    var process1 = Child_Process.spawn('echo', ['Hello']);
+    var process2 = Child_Process.spawn('echo', ['World']);
+
+    // we send the processes in reverse order because to highlight
+    // the fact that the 'end' event from process1 should not
+    // fire too early
+    stream.write(process2);
+    stream.write(process1);
+
+    stream.end();
+    stream.pipe(sink);
+  });
+
+
 })
