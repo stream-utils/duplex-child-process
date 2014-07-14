@@ -20,7 +20,9 @@
   "devDependencies": {
     "mocha": "*",
     "should": "*",
-    "stream-to": "*"
+    "stream-to": "*",
+    "dev-null": "*",
+    "stream-stream": "*"
   },
   "scripts": {
     "test": "make test;"

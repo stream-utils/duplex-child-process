@@ -2,6 +2,8 @@ var path = require('path')
 var fs = require('fs')
 var assert = require('assert')
 var streamTo = require('stream-to')
+var ss = require('stream-stream');
+var devnull = require('dev-null');
 
 var Child_Process = require('./')
 
@@ -91,4 +93,23 @@ describe('Duplex Child Process', function () {
       done()
     })
   })
+
+  it('should work with stream-stream', function(done) {
+    var stream = ss();
+    var sink = devnull();
+    sink.on('finish', done);
+
+    var process1 = Child_Process.spawn('sleep', ['0.1']);
+    var process2 = Child_Process.spawn('sleep', ['0.5']);
+
+    // we send the processes in reverse order because to highlight
+    // the fact that the 'end' event from process1 should not
+    // fire too early
+    stream.write(process2);
+    stream.write(process1);
+
+    stream.end();
+    stream.pipe(sink);
+  }); 
+
 })
