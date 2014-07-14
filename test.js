@@ -26,6 +26,7 @@ describe('Duplex Child Process', function () {
 
   it('should emit an end event', function (done) {
     var proc = Child_Process.spawn('identify', ['-format', '%m', image])
+    proc.pipe(devnull())
     proc.on('end', done)
     proc.on('error', done)
   })
@@ -59,7 +60,7 @@ describe('Duplex Child Process', function () {
 
   it('should cleanup after itself', function (done) {
     var proc = Child_Process.spawn('convert', ['-version'])
-    .on('end', function () {
+    .on('close', function () {
       setImmediate(function () {
         assert.ok(!proc._process)
         assert.ok(!proc._stdin)
