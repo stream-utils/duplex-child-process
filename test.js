@@ -31,6 +31,25 @@ describe('Duplex Child Process', function () {
     proc.on('error', done)
   })
 
+  it('should emit end event before close event', function(done) {
+    var proc = Child_Process.spawn('identify', ['-format', '%m', image])
+
+    var events = ['end', 'error', 'close']
+    var triggered = [];
+    events.forEach(function(ev) {
+      proc.on(ev, function() {
+        triggered.push(ev);
+      });
+    })
+    proc.on('close', function() {
+      assert.deepEqual(triggered, [ 'end', 'close' ])
+      done()
+    });
+    proc.pipe(devnull())
+
+  });
+
+
   it('should return the correct stdout', function (done) {
     var proc = Child_Process.spawn('identify', ['-format', '%m', image])
 
