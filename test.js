@@ -1,7 +1,7 @@
 var path = require('path')
 var fs = require('fs')
 var assert = require('assert')
-var streamTo = require('stream-to')
+var getRawBody = require('raw-body')
 var ss = require('stream-stream');
 var devnull = require('dev-null');
 
@@ -34,7 +34,7 @@ describe('Duplex Child Process', function () {
   it('should return the correct stdout', function (done) {
     var proc = Child_Process.spawn('identify', ['-format', '%m', image])
 
-    streamTo.buffer(proc, function (err, buf) {
+    getRawBody(proc, function (err, buf) {
       assert.ifError(err)
       assert.equal('JPEG', buf.toString('utf8').trim())
       done()
@@ -51,7 +51,7 @@ describe('Duplex Child Process', function () {
     .on('error', done)
     .pipe(proc2)
 
-    streamTo.buffer(proc2, function (err, buf) {
+    getRawBody(proc2, function (err, buf) {
       assert.ifError(err)
       assert.equal('PNG', buf.toString('utf8').trim())
       done()

@@ -20,7 +20,7 @@
   "devDependencies": {
     "mocha": "*",
     "should": "*",
-    "stream-to": "*",
+    "raw-body": "*",
     "dev-null": "*",
     "stream-stream": "*"
   },
