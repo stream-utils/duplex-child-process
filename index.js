@@ -60,7 +60,7 @@ Child_Process.prototype.spawn = function (command, args, options) {
   this._stdout = this._process.stdout
   this._stderr = this._process.stderr
   this._writer.pipe(this._stdin)
-  this._stdout.pipe(this._reader)
+  this._stdout.pipe(this._reader, { end: false })
   this.kill = this.destroy = kill
 
   // listen to stderr.
@@ -72,14 +72,25 @@ Child_Process.prototype.spawn = function (command, args, options) {
   this._stdin.on('error', noop)
   this._stdout.on('error', noop)
   
+  this._stdout.on('end', onStdoutEnd);
+
   this._process.once('close', onExit)
   this._process.once('error', onError)
 
   var ex
   var exited
   var killed
+  var ended
 
   return this
+
+  function onStdoutEnd() {
+    if (exited && !ended) {
+      ended = true;
+      that._reader.end();
+      setImmediate(that.emit.bind(that, 'close'))
+    }
+  }
 
   function onStderrData(chunk) {
     stderr.push(chunk)
@@ -99,7 +110,7 @@ Child_Process.prototype.spawn = function (command, args, options) {
       that.emit('close')
     } else if (code === 0 && signal == null) {
       // All is well
-      that.emit('close')
+      onStdoutEnd()
     } else {
       // Everything else
       ex = new Error('Command failed: ' + Buffer.concat(stderr).toString('utf8'))
