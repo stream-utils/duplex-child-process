@@ -132,4 +132,24 @@ describe('Duplex Child Process', function () {
     stream.pipe(sink);
   }); 
 
+  it('should not emit an end event when SIGKILL', function(done) {
+    var sink = devnull();
+    var proc = Child_Process.spawn('sleep', ['1']);
+    var events = ['end', 'error', 'close']
+    var triggered = [];
+    events.forEach(function(ev) {
+      proc.on(ev, function() {
+        triggered.push(ev);
+      });
+    })
+    proc.on('close', function() {
+      assert.deepEqual(triggered, [ 'error', 'close' ])
+      done();
+    });
+    proc.pipe(sink);
+    setTimeout(function() {
+      proc._process.kill('SIGKILL');
+    }, 200);
+  });
+
 })
