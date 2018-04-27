@@ -1,6 +1,9 @@
 node_js:
-- "0.10"
+- "6"
+- "8"
+- "10"
 language: node_js
 before_install:
 - sudo apt-get update
 - sudo apt-get install imagemagick
+sudo: true
