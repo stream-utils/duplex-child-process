@@ -97,7 +97,7 @@ Child_Process.prototype.spawn = function (command, args, options) {
   }
 
   function onExit(code, signal) {
-    if (exited)
+    if (exited || exited === null)
       return
 
     exited = true
@@ -131,18 +131,19 @@ Child_Process.prototype.spawn = function (command, args, options) {
     onExit()
   }
 
-  function kill() {
+  function kill(cb) {
     that._stdout.destroy()
     that._stderr.destroy()
 
     killed = true
 
     try {
-      that._process.kill(options.killSignal || 'SIGTERM')
+      that._process.kill((options && options.killSignal) || 'SIGTERM')
     } catch (e) {
       ex = e
       onExit()
     }
+    cb && cb()
   }
 
   function cleanup() {

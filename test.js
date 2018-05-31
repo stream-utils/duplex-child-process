@@ -95,7 +95,7 @@ describe('Duplex Child Process', function () {
     var proc = Child_Process.spawn('convert', ['-version'])
     .on('close', done)
     .on('error', done)
-    .destroy()
+    .destroy(done)
   })
 
   it('should pipe a source stream before spawning', function (done) {
