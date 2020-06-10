@@ -87,8 +87,7 @@ Child_Process.prototype.spawn = function (command, args, options) {
   function onStdoutEnd() {
     if (exited && !ended) {
       ended = true;
-      that._reader.end();
-      setImmediate(that.emit.bind(that, 'close'))
+      that._reader.end(that.emit.bind(that, 'close'));
     }
   }
 
